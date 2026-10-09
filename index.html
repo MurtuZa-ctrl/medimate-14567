@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MediMate Prototype</title>
+<style>
+:root{
+  --teal:#0B5D5E; --dark:#073B3C; --tint:#EAF4F2; --line:#B7D3CF; --coral:#F26B4E;
+  --ink:#1F2A2E; --muted:#5B6B70; --white:#fff; --bg:#F6FAF9;
+  --low:#2E8B57; --med:#C98A00; --high:#D9482B;
+  --c-orch:#073B3C; --c-rem:#0B7A75; --c-adh:#3C6E91; --c-care:#D9482B; --c-refill:#B7791F; --c-doc:#7B4B94;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Segoe UI",Calibri,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.4}
+header{background:var(--dark);color:#fff;padding:16px 24px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+header h1{margin:0;font-size:26px;font-family:Cambria,Georgia,serif}
+header p{margin:2px 0 0;color:#CADCDA;font-size:14px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--coral);color:#fff;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600}
+.chip.alt{background:var(--teal)}
+.note{background:#FFF4E5;border-bottom:1px solid #F3D9AE;padding:8px 24px;font-size:13.5px;color:#6B4A00}
+main{max-width:1280px;margin:0 auto;padding:18px 16px 40px;display:grid;gap:16px;grid-template-columns:repeat(12,1fr)}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h2{margin:0 0 10px;font-size:16px;color:var(--teal);font-family:Cambria,Georgia,serif;font-size:18px}
+.span4{grid-column:span 4}.span5{grid-column:span 5}.span3{grid-column:span 3}.span6{grid-column:span 6}.span7{grid-column:span 7}.span8{grid-column:span 8}.span12{grid-column:span 12}
+@media(max-width:1000px){.span4,.span5,.span3,.span6,.span7,.span8{grid-column:span 12}}
+label{display:block;font-size:13px;color:var(--muted);margin:8px 0 3px}
+input,select,button{font:inherit}
+input,select{width:100%;padding:7px 9px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1}
+button{cursor:pointer;border:0;border-radius:8px;padding:8px 12px;background:var(--teal);color:#fff;font-weight:600}
+button:hover{background:var(--dark)}
+button.sec{background:var(--tint);color:var(--teal);border:1px solid var(--line)}
+button.sec:hover{background:#d9ece8}
+button.warn{background:var(--coral)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.clock{display:flex;align-items:center;justify-content:space-between;background:var(--tint);border-radius:10px;padding:12px 14px;margin-bottom:10px}
+.clock .t{font-size:38px;font-weight:700;color:var(--teal);font-family:Cambria,Georgia,serif;line-height:1}
+.clock small{color:var(--muted)}
+.ctrl{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ctrl button{flex:1;min-width:84px;padding:7px 8px;font-size:13.5px}
+.dose{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#fff}
+.dose.due{border-color:var(--coral);background:#FFF6F3}
+.dose.taken{background:#F0F8F2}
+.dose.missed{background:#FDEEEA;border-color:#EFB8AA}
+.dose .time{font-weight:700;font-size:18px;color:var(--teal)}
+.dose .name{font-weight:600}
+.dose .sub{font-size:13px;color:var(--muted)}
+.tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:700;color:#fff;margin-right:4px}
+.tag.upcoming{background:#6B7C82}.tag.due{background:var(--coral)}.tag.taken{background:var(--low)}.tag.missed{background:var(--high)}
+.tag.low{background:var(--low)}.tag.medium{background:var(--med)}.tag.high{background:var(--high)}
+.feed{max-height:430px;overflow:auto;display:flex;flex-direction:column;gap:7px}
+.ev{border-left:4px solid var(--c);background:#fafcfc;border-radius:6px;padding:6px 10px}
+.ev .h{font-size:12px;color:var(--muted);display:flex;gap:8px;align-items:center}
+.ev .a{font-weight:700;color:var(--c)}
+.ev .m{font-size:14px}
+.bubble{background:#DCF8C6;border-radius:10px 10px 10px 2px;padding:8px 10px;margin-bottom:8px;font-size:14px}
+.bubble small{display:block;color:var(--muted);margin-top:3px}
+.meter{height:12px;background:#E3ECEA;border-radius:999px;overflow:hidden;margin:6px 0}
+.meter>i{display:block;height:100%}
+.med{display:grid;grid-template-columns:1fr auto;gap:6px;border-bottom:1px solid #E3ECEA;padding:7px 0;align-items:center}
+.med:last-child{border-bottom:0}
+.med .mini{display:flex;gap:6px}
+.med button{padding:4px 9px;font-size:12.5px}
+.path li{margin:2px 0;font-size:13.5px}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+.kpi{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.kpi div{flex:1;min-width:110px;background:var(--tint);border-radius:10px;padding:8px 10px}
+.kpi b{display:block;font-size:22px;color:var(--teal);font-family:Cambria,Georgia,serif}
+.kpi span{font-size:12.5px;color:var(--muted)}
+details summary{cursor:pointer;color:var(--teal);font-weight:600}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+td,th{padding:4px 6px;border-bottom:1px solid #E3ECEA;text-align:left}
+footer{max-width:1280px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font-size:13px}
+@media print{header,.note,#colA,#colB,#colC,.noprint{display:none!important}main{display:block}.card{border:0}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>MediMate</h1>
+    <p>Multi-agent AI medication companion for elderly patients</p>
+  </div>
+  <div class="chips"><span class="chip">SDG 3: Good Health</span><span class="chip alt">Prototype</span><span class="chip alt">Risk model: synthetic data</span></div>
+</header>
+<div class="note"><b>Prototype notice.</b> This demo sends no real messages. The risk model is trained on synthetic data and the clock is simulated. MediMate only reminds and tracks; it does not diagnose or change prescriptions.</div>
+
+<main id="app"></main>
+<footer>Built by Syed Murtuza Amanath Hussain, MJCET, for the AICTE | IBM SkillsBuild Machine Learning and Applied AI Internship 2026. Translations are draft templates and need native-speaker review.</footer>
+
+<script>
+/* ============ Embedded ML model (exported by train_model.py) ============ */
+const MODEL = {"features": ["age", "doses_per_day", "lives_alone", "missed_last_7d", "hour", "weekend"], "tree": {"f": 0, "t": 68.5, "l": {"f": 3, "t": 3.5, "l": {"f": 1, "t": 3.5, "l": {"f": 2, "t": 0.5, "l": {"p": 0.0856}, "r": {"p": 0.1369}}, "r": {"f": 3, "t": 2.5, "l": {"p": 0.181}, "r": {"p": 0.3182}}}, "r": {"f": 1, "t": 1.5, "l": {"p": 0.1587}, "r": {"f": 5, "t": 0.5, "l": {"p": 0.3021}, "r": {"p": 0.47}}}}, "r": {"f": 1, "t": 2.5, "l": {"f": 3, "t": 3.5, "l": {"f": 3, "t": 1.5, "l": {"p": 0.1033}, "r": {"p": 0.2256}}, "r": {"f": 4, "t": 16.0, "l": {"p": 0.2685}, "r": {"p": 0.4433}}}, "r": {"f": 2, "t": 0.5, "l": {"f": 3, "t": 1.5, "l": {"p": 0.1989}, "r": {"p": 0.3641}}, "r": {"f": 1, "t": 4.5, "l": {"p": 0.4178}, "r": {"p": 0.5581}}}}}, "meta": {"type": "DecisionTreeClassifier(max_depth=4, min_samples_leaf=60)", "train_rows": 4500, "test_rows": 1500, "test_accuracy": 0.767, "test_auc": 0.682, "baseline_accuracy": 0.769, "data": "synthetic"}};
+
+/* ============ Helpers ============ */
+const $ = (s,r=document)=>r.querySelector(s);
+const esc = s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n=>String(n).padStart(2,'0');
+const fmt = m=>pad(Math.floor(m/60))+':'+pad(m%60);
+const parseT = s=>{const [h,m]=s.split(':').map(Number);return h*60+m;};
+const MISS_AFTER = 120;          // minutes overdue before a dose counts as missed
+const DAY_START = 7*60+50, DAY_END = 23*60;
+
+const BANDS = {
+  low:    {label:'Low',    remind:30, escalate:60},
+  medium: {label:'Medium', remind:20, escalate:40},
+  high:   {label:'High',   remind:10, escalate:20},
+};
+const band = p => p>=0.40 ? 'high' : p>=0.25 ? 'medium' : 'low';
+
+const TEXT = {
+  en:{first:(m)=>`Time for your ${m}. Please take it and tap "Taken".`, again:(m)=>`Gentle reminder: your ${m} is still pending.`, voice:'en-IN'},
+  hi:{first:(m)=>`${m} लेने का समय हो गया है। दवा लेकर "Taken" दबाएँ।`, again:(m)=>`याद दिलाना: ${m} अभी बाकी है।`, voice:'hi-IN'},
+  te:{first:(m)=>`${m} వేసుకునే సమయం అయింది. మందు వేసుకుని "Taken" నొక్కండి.`, again:(m)=>`గుర్తు చేస్తున్నాం: ${m} ఇంకా మిగిలి ఉంది.`, voice:'te-IN'},
+};
+
+/* ============ Model inference (decision tree with explainable path) ============ */
+function predict(x){
+  let node = MODEL.tree; const path=[];
+  while(node.f!==undefined){
+    const name = MODEL.features[node.f], goLeft = x[node.f] <= node.t;
+    path.push(`${name} = ${x[node.f]} is ${goLeft?'<=':'>'} ${node.t}`);
+    node = goLeft ? node.l : node.r;
+  }
+  return {p:node.p, path};
+}
+
+/* ============ State ============ */
+const DEMO_HISTORY = [[1,1,1,1],[1,1,0,1],[1,1,1,1],[1,1,1,0],[1,1,1,1],[1,1,0,1],[1,1,1,1]];
+function defaultState(){
+  return {
+    patient:{name:'Mr. Rao', age:68, livesAlone:true, lang:'en', caregiver:'Priya (daughter)'},
+    weekend:false,
+    meds:[
+      {id:1,name:'Diabetes tablet',time:'08:00',per:1,left:6,refillFlag:false},
+      {id:2,name:'Blood pressure tablet',time:'08:00',per:1,left:30,refillFlag:false},
+      {id:3,name:'Diabetes tablet (evening)',time:'20:00',per:1,left:9,refillFlag:false},
+      {id:4,name:'Cholesterol tablet',time:'21:30',per:1,left:25,refillFlag:false},
+    ],
+    nextId:5,
+    history: JSON.parse(JSON.stringify(DEMO_HISTORY)).map((d,i)=>({slots:d})),
+  };
+}
+let S = defaultState();
+try{ const saved = localStorage.getItem('medimate_v1'); if(saved){ const o=JSON.parse(saved); if(o&&o.meds&&o.patient) S=o; } }catch(e){}
+function save(){ try{ localStorage.setItem('medimate_v1', JSON.stringify(S)); }catch(e){} }
+
+let day, log, inbox, auto=null;
+function newDay(){
+  day = {clock:DAY_START, doses:[]};
+  [...S.meds].sort((a,b)=>parseT(a.time)-parseT(b.time)).forEach(m=>{
+    day.doses.push({medId:m.id,status:'upcoming',reminders:0,nextAt:0,alerted:false,band:null,p:null,path:[],takenAt:null,acked:false});
+  });
+  log=[]; inbox=[];
+  addLog('Orchestrator','New day started. Schedule loaded for '+S.patient.name+' ('+day.doses.length+' doses).');
+  refillCheck();
+}
+
+function med(id){return S.meds.find(m=>m.id===id);}
+function addLog(agent,msg){ log.unshift({t:day.clock,agent,msg}); }
+function missedLast7(){
+  const hist = S.history.slice(-7).reduce((a,d)=>a+d.slots.filter(v=>!v).length,0);
+  const today = day.doses.filter(d=>d.status==='missed').length;
+  return Math.min(14,hist+today);
+}
+function features(dose){
+  const m = med(dose.medId);
+  return [S.patient.age, S.meds.length, S.patient.livesAlone?1:0, missedLast7(), Math.floor(parseT(m.time)/60), S.weekend?1:0];
+}
+function riskOf(dose){ const r=predict(features(dose)); return r; }
+
+/* ============ Agents ============ */
+function reminderAgent(d,first){
+  const m=med(d.medId), T=TEXT[S.patient.lang];
+  d.reminders++;
+  d.nextAt = day.clock + BANDS[d.band].remind;
+  addLog('Reminder', (first?T.first(m.name):T.again(m.name))+`  [reminder ${d.reminders}, next in ${BANDS[d.band].remind} min]`);
+}
+function caregiverAgent(d,over){
+  const m=med(d.medId);
+  d.alerted=true;
+  const text=`${S.patient.name} has not confirmed "${m.name}" (${over} min overdue). Please check in with them.`;
+  inbox.push({t:day.clock,text,medId:d.medId,kind:'miss'});
+  addLog('Caregiver',`Alert sent to ${S.patient.caregiver}: ${m.name} is ${over} min overdue.`);
+}
+function refillCheck(){
+  S.meds.forEach(m=>{
+    const days=Math.floor(m.left/m.per);
+    if(days<=5 && !m.refillFlag){
+      m.refillFlag=true;
+      addLog('Refill',`${m.name}: only ${days} day(s) of tablets left. Refill needed.`);
+      inbox.push({t:day.clock,text:`Refill needed: "${m.name}" has about ${days} day(s) of tablets left.`,kind:'refill'});
+    }
+  });
+}
+function adherenceAgent(d,status){
+  const m=med(d.medId);
+  if(status==='taken'){
+    const delay=day.clock-parseT(m.time);
+    addLog('Adherence',`${m.name} confirmed${delay>0?' ('+delay+' min late)':' on time'}. Dose logged.`);
+  } else if(status==='missed'){
+    addLog('Adherence',`${m.name} marked MISSED after ${MISS_AFTER} min. Recent misses now ${missedLast7()}.`);
+  }
+}
+function runAgents(){
+  day.doses.forEach(d=>{
+    if(d.status==='taken'||d.status==='missed') return;
+    const m=med(d.medId), dt=parseT(m.time);
+    if(day.clock<dt){ d.status='upcoming'; return; }
+    if(d.status==='upcoming'){
+      d.status='due';
+      const r=riskOf(d); d.p=r.p; d.path=r.path; d.band=band(r.p);
+      addLog('Orchestrator',`${m.name} is due. Adherence Agent risk = ${Math.round(r.p*100)}% (${BANDS[d.band].label}). Plan: remind every ${BANDS[d.band].remind} min, alert caregiver after ${BANDS[d.band].escalate} min.`);
+    }
+    const over=day.clock-dt;
+    if(over>=MISS_AFTER){ d.status='missed'; adherenceAgent(d,'missed'); return; }
+    if((d.reminders===0 || day.clock>=d.nextAt) && d.reminders<5) reminderAgent(d,d.reminders===0);
+    if(!d.alerted && over>=BANDS[d.band].escalate) caregiverAgent(d,over);
+  });
+}
+function advanceTo(target){
+  target=Math.min(target,DAY_END);
+  while(day.clock<target){ day.clock=Math.min(day.clock+5,target); runAgents(); }
+  render();
+}
+function markTaken(i){
+  const d=day.doses[i], m=med(d.medId);
+  if(d.status==='taken'||d.status==='missed') return;
+  d.status='taken'; d.takenAt=day.clock;
+  m.left=Math.max(0,m.left-m.per);
+  adherenceAgent(d,'taken');
+  refillCheck(); save(); render();
+}
+function ackCaregiver(i){
+  const b=inbox[i]; if(!b||b.acked) return;
+  b.acked=true;
+  addLog('Caregiver',`${S.patient.caregiver} acknowledged and is calling ${S.patient.name}.`);
+  render();
+}
+function finishDay(){
+  stopAuto();
+  const slots=day.doses.map(d=>d.status==='taken'?1:0);
+  S.history.push({slots}); S.history=S.history.slice(-7);
+  S.weekend=!S.weekend;
+  save(); newDay(); render();
+}
+
+/* ============ Doctor-summary agent ============ */
+function summary(){
+  const days=S.history.slice(-7);
+  const total=days.reduce((a,d)=>a+d.slots.length,0);
+  const taken=days.reduce((a,d)=>a+d.slots.reduce((x,y)=>x+y,0),0);
+  const pct=total?Math.round(taken/total*100):0;
+  // most missed slot: position index -> approx by sorted med order of current schedule
+  const sorted=[...S.meds].sort((a,b)=>parseT(a.time)-parseT(b.time));
+  const missBy=sorted.map((m,i)=>({m,c:days.reduce((a,d)=>a+(d.slots[i]===0?1:0),0)}));
+  missBy.sort((a,b)=>b.c-a.c);
+  const worst=missBy[0]&&missBy[0].c>0?missBy[0]:null;
+  const refill=S.meds.filter(m=>Math.floor(m.left/m.per)<=5);
+  return {days,pct,total,taken,worst,refill};
+}
+
+/* ============ Rendering ============ */
+function agentColor(a){return {Orchestrator:'--c-orch',Reminder:'--c-rem',Adherence:'--c-adh',Caregiver:'--c-care',Refill:'--c-refill'}[a]||'--c-doc';}
+function render(){
+  const p=S.patient;
+  const nextDose=day.doses.find(d=>d.status==='due')||day.doses.find(d=>d.status==='upcoming');
+  let live=null; if(nextDose){ live=riskOf(nextDose); }
+  const sm=summary();
+  const todayResolved=day.doses.filter(d=>d.status==='taken'||d.status==='missed');
+  const todayPct=todayResolved.length?Math.round(todayResolved.filter(d=>d.status==='taken').length/todayResolved.length*100):null;
+
+  $('#app').innerHTML = `
+  <section class="card span4" id="colA">
+    <h2>Patient profile</h2>
+    <label>Name</label><input id="p_name" value="${esc(p.name)}">
+    <div class="row"><div><label>Age</label><input id="p_age" type="number" min="18" max="100" value="${p.age}"></div>
+    <div><label>Reminder language</label><select id="p_lang">
+      <option value="en"${p.lang==='en'?' selected':''}>English</option><option value="hi"${p.lang==='hi'?' selected':''}>Hindi</option><option value="te"${p.lang==='te'?' selected':''}>Telugu</option></select></div></div>
+    <div class="row"><div><label>Lives alone?</label><select id="p_alone"><option value="1"${p.livesAlone?' selected':''}>Yes</option><option value="0"${!p.livesAlone?' selected':''}>No</option></select></div>
+    <div><label>Day type</label><select id="p_weekend"><option value="0"${!S.weekend?' selected':''}>Weekday</option><option value="1"${S.weekend?' selected':''}>Weekend</option></select></div></div>
+    <label>Caregiver</label><input id="p_care" value="${esc(p.caregiver)}">
+
+    <h2 style="margin-top:16px">Medicine schedule</h2>
+    ${S.meds.map(m=>`<div class="med"><div><b>${esc(m.name)}</b><div class="sub" style="font-size:13px;color:var(--muted)">${m.time} &middot; ${m.left} tablets left (~${Math.floor(m.left/m.per)} days)</div></div>
+      <div class="mini"><button class="sec" data-act="refill" data-id="${m.id}">Refilled +30</button><button class="sec" data-act="del" data-id="${m.id}">Remove</button></div></div>`).join('')}
+    <details style="margin-top:10px"><summary>Add a medicine</summary>
+      <label>Medicine name</label><input id="n_name" placeholder="e.g. Thyroid tablet">
+      <div class="row"><div><label>Time</label><input id="n_time" type="time" value="09:00"></div><div><label>Tablets left</label><input id="n_left" type="number" min="0" value="30"></div></div>
+      <button style="margin-top:8px;width:100%" data-act="add">Add to schedule</button></details>
+  </section>
+
+  <section class="card span4" id="colB">
+    <h2>Today's doses</h2>
+    <div class="clock"><div><div class="t">${fmt(day.clock)}</div><small>Simulated clock &middot; ${S.weekend?'Weekend':'Weekday'}</small></div>
+      <div style="text-align:right"><small>Caregiver alerts today</small><div style="font-size:22px;font-weight:700;color:var(--coral)">${inbox.filter(b=>b.kind==='miss').length}</div></div></div>
+    <div class="ctrl">
+      <button class="sec" data-act="adv" data-m="15">+15 min</button>
+      <button class="sec" data-act="adv" data-m="60">+1 hour</button>
+      <button class="sec" data-act="jump" data-m="1195">Jump to 19:55</button>
+      <button data-act="auto">${auto?'Pause auto-play':'Auto-play'}</button>
+    </div>
+    ${day.doses.map((d,i)=>{
+      const m=med(d.medId); const r=(d.p!=null)?{p:d.p}:riskOf(d); const b=d.band||band(r.p);
+      return `<div class="dose ${d.status}">
+        <div class="time">${m.time}</div>
+        <div><div class="name">${esc(m.name)}</div>
+          <div class="sub"><span class="tag ${d.status}">${d.status.toUpperCase()}</span><span class="tag ${b}">${BANDS[b].label} risk ${Math.round(r.p*100)}%</span>${d.status==='taken'?'<span> taken '+fmt(d.takenAt)+'</span>':''}${d.reminders?'<span> &middot; '+d.reminders+' reminder(s)</span>':''}</div></div>
+        <div>${(d.status==='due'||d.status==='upcoming')?`<button data-act="taken" data-i="${i}" ${d.status==='upcoming'?'class="sec"':''}>Taken</button>`:''}</div>
+      </div>`;}).join('')}
+    <div class="row noprint" style="margin-top:8px"><button class="sec" data-act="reset">Reset day</button><button class="warn" data-act="finish">Finish day &rarr; history</button></div>
+
+    <h2 style="margin-top:16px">Why this risk? (Adherence Agent)</h2>
+    ${live?`<div>Next dose: <b>${esc(med(nextDose.medId).name)}</b> &middot; predicted miss risk <b>${Math.round(live.p*100)}%</b></div>
+    <div class="meter"><i style="width:${Math.min(100,live.p*100/0.7*1)}%;background:var(--${band(live.p)==='high'?'high':band(live.p)==='medium'?'med':'low'})"></i></div>
+    <ol class="path">${live.path.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`:'<div class="empty">All of today\'s doses are resolved.</div>'}
+  </section>
+
+  <section class="card span4" id="colC">
+    <h2>Agent activity</h2>
+    <div class="feed">${log.length?log.map(e=>`<div class="ev" style="--c:var(${agentColor(e.agent)})"><div class="h"><span class="a">${e.agent} Agent</span><span>${fmt(e.t)}</span></div><div class="m">${esc(e.msg)}</div></div>`).join(''):'<div class="empty">No activity yet.</div>'}</div>
+    <h2 style="margin-top:16px">${esc(p.caregiver)}: message inbox</h2>
+    ${inbox.length?inbox.map((b,i)=>`<div class="bubble">${esc(b.text)}<small>${fmt(b.t)} &middot; sent by MediMate</small>${b.kind==='miss'?`<button class="sec" style="margin-top:6px;padding:4px 10px;font-size:13px" data-act="ack" data-i="${i}" ${b.acked?'disabled':''}>${b.acked?'Acknowledged':'I will call now'}</button>`:''}</div>`).join(''):'<div class="empty">No messages sent to the caregiver.</div>'}
+  </section>
+
+  <section class="card span7" id="docsum">
+    <h2>Doctor summary (Doctor-Summary Agent)</h2>
+    <div class="kpi">
+      <div><b>${sm.pct}%</b><span>7-day adherence</span></div>
+      <div><b>${sm.total-sm.taken}</b><span>missed of ${sm.total} doses</span></div>
+      <div><b>${todayPct==null?'-':todayPct+'%'}</b><span>today so far</span></div>
+    </div>
+    ${chart(sm.days,todayPct)}
+    <p style="margin:8px 0 0"><b>Patient:</b> ${esc(p.name)}, ${p.age} years &middot; <b>Schedule:</b> ${S.meds.length} doses/day</p>
+    <ul style="margin:6px 0 0;padding-left:20px">
+      <li>${sm.worst?`Most missed dose: <b>${esc(sm.worst.m.name)}</b> (${sm.worst.c} of ${sm.days.length} days). The doctor may wish to review timing for this dose.`:'No missed doses in the recorded period.'}</li>
+      <li>${sm.refill.length?`Refills needed soon: ${sm.refill.map(m=>esc(m.name)).join(', ')}.`:'No refills needed in the next 5 days.'}</li>
+      <li>Generated from patient confirmations. MediMate does not provide medical advice.</li>
+    </ul>
+    <div class="row noprint" style="margin-top:10px"><button class="sec" data-act="print">Print / save as PDF</button><button class="sec" data-act="demo">Load demo history</button><button class="sec" data-act="clear">Clear history</button></div>
+  </section>
+
+  <section class="card span5">
+    <h2>About the risk model</h2>
+    <p style="margin:0 0 8px">The Adherence Agent uses a small <b>decision tree</b> (scikit-learn) that estimates the chance of missing the next dose. The Orchestrator uses this risk to choose how often to remind and when to alert the caregiver.</p>
+    <table>
+      <tr><th>Model</th><td>${esc(MODEL.meta.type)}</td></tr>
+      <tr><th>Training data</th><td><b>Synthetic</b>, ${MODEL.meta.train_rows} rows</td></tr>
+      <tr><th>Test AUC</th><td>${MODEL.meta.test_auc} (held-out ${MODEL.meta.test_rows} rows)</td></tr>
+      <tr><th>Test accuracy</th><td>${MODEL.meta.test_accuracy} vs ${MODEL.meta.baseline_accuracy} majority baseline</td></tr>
+      <tr><th>Inputs</th><td>${MODEL.features.join(', ')}</td></tr>
+    </table>
+    <p style="margin:8px 0 0;color:var(--muted);font-size:13.5px">Honest note: the labels are generated from assumptions, so these scores show the pipeline works, not real-world performance. A pilot would train on consented real adherence logs.</p>
+  </section>`;
+
+  // bind profile inputs
+  const bind=(id,fn)=>{const el=$(id); if(el) el.addEventListener('change',()=>{fn(el.value); save(); render();});};
+  bind('#p_name',v=>S.patient.name=v||'Patient'); bind('#p_age',v=>S.patient.age=Math.max(18,Math.min(100,+v||65)));
+  bind('#p_lang',v=>S.patient.lang=v); bind('#p_alone',v=>S.patient.livesAlone=v==='1'); bind('#p_care',v=>S.patient.caregiver=v||'Caregiver');
+  bind('#p_weekend',v=>S.weekend=v==='1');
+}
+
+function chart(days,todayPct){
+  const W=520,H=130,bw=34,gap=22,left=14;
+  const bars=days.map((d,i)=>({l:'Day '+(i+1-days.length-0)+'',v:Math.round(d.slots.reduce((a,b)=>a+b,0)/d.slots.length*100)}));
+  bars.forEach((b,i)=>b.l=(days.length-i)+'d ago');
+  if(todayPct!=null) bars.push({l:'Today',v:todayPct,today:true});
+  if(!bars.length) return '<div class="empty">No history yet. Finish a day or load demo history.</div>';
+  const x=i=>left+i*(bw+gap);
+  return `<svg viewBox="0 0 ${Math.max(W,left*2+bars.length*(bw+gap))} ${H+34}" width="100%" role="img" aria-label="Adherence per day">
+    <line x1="0" y1="${H}" x2="100%" y2="${H}" stroke="#B7D3CF"/>
+    ${bars.map((b,i)=>{const h=Math.max(2,b.v/100*(H-22));const c=b.v>=90?'#2E8B57':b.v>=70?'#C98A00':'#D9482B';
+      return `<rect x="${x(i)}" y="${H-h}" width="${bw}" height="${h}" rx="4" fill="${b.today?'#0B5D5E':c}"/>
+      <text x="${x(i)+bw/2}" y="${H-h-5}" font-size="12" text-anchor="middle" fill="#1F2A2E">${b.v}%</text>
+      <text x="${x(i)+bw/2}" y="${H+16}" font-size="11" text-anchor="middle" fill="#5B6B70">${b.l}</text>`;}).join('')}
+  </svg>`;
+}
+
+/* ============ Events ============ */
+function stopAuto(){ if(auto){clearInterval(auto);auto=null;} }
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]'); if(!b) return;
+  const a=b.dataset.act;
+  if(a==='taken') markTaken(+b.dataset.i);
+  else if(a==='adv') advanceTo(day.clock+ +b.dataset.m);
+  else if(a==='jump') advanceTo(Math.max(day.clock,+b.dataset.m));
+  else if(a==='auto'){ if(auto){stopAuto();render();} else { auto=setInterval(()=>{ if(day.clock>=DAY_END){stopAuto();render();return;} advanceTo(day.clock+10); },500); render(); } }
+  else if(a==='reset'){ stopAuto(); newDay(); render(); }
+  else if(a==='finish') finishDay();
+  else if(a==='ack') ackCaregiver(+b.dataset.i);
+  else if(a==='refill'){ const m=med(+b.dataset.id); m.left+=30; m.refillFlag=false; addLog('Refill',`${m.name} refilled. ${m.left} tablets in stock.`); save(); render(); }
+  else if(a==='del'){ S.meds=S.meds.filter(m=>m.id!==+b.dataset.id); save(); stopAuto(); newDay(); render(); }
+  else if(a==='add'){ const n=$('#n_name').value.trim(); if(!n) return; S.meds.push({id:S.nextId++,name:n,time:$('#n_time').value||'09:00',per:1,left:+$('#n_left').value||30,refillFlag:false}); save(); stopAuto(); newDay(); render(); }
+  else if(a==='print') window.print();
+  else if(a==='demo'){ S.history=DEMO_HISTORY.map(d=>({slots:d.slice(0,S.meds.length).concat(Array(Math.max(0,S.meds.length-d.length)).fill(1))})); save(); render(); }
+  else if(a==='clear'){ S.history=[]; save(); render(); }
+});
+
+newDay(); render();
+</script>
+</body>
+</html>
